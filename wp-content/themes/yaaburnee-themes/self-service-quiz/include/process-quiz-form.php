@@ -23,24 +23,24 @@ if( $_POST['input-question'] ) {
   if( $_POST['quiz-new-question'] == "newQuestion" ) {
   	$curr_quiz_id = $_POST['curr-quiz-id'];
   	$next_quiz_id = $quiz_id;
-  	$enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $wpdb);
-	echo "<script>console.log('newQuiz');</script>";		 // remove console.log ||KVB
+      $enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $guid, $wpdb);
+      echo "<script>console.log('newQuiz');</script>";		 // remove console.log ||KVB
 	echo "<script>console.log('".$curr_quiz_id."');</script>";		 // remove console.log ||KVB
 	echo "<script>console.log('".$enp_quiz_next."');</script>";			 // remove console.log ||KVB
 	header("Location: " . get_site_url() . "/configure-quiz?curr=" . $curr_quiz_id );
   } else if( $_POST['quiz-new-question'] == "newQuestionAddQuestion" ) {
   	$curr_quiz_id = $_POST['curr-quiz-id'];
   	$next_quiz_id = $quiz_id;
-  	$enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $wpdb);
-	echo "<script>console.log('newQuiz');</script>";		 // remove console.log ||KVB
+      $enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $guid, $wpdb);
+      echo "<script>console.log('newQuiz');</script>";		 // remove console.log ||KVB
 	echo "<script>console.log('".$curr_quiz_id."');</script>";		 // remove console.log ||KVB
 	echo "<script>console.log('".$enp_quiz_next."');</script>";			 // remove console.log ||KVB
 	header("Location: " . get_site_url() . "/configure-quiz?curr=" . $curr_quiz_id );
   } else if( $_POST['quiz-new-question'] == "noNewQuestionAddQuestion" ) {
   	$curr_quiz_id = $_POST['curr-quiz-id'];
   	$next_quiz_id = $quiz_id;
-  	$enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $wpdb);
-	echo "<script>console.log('noNewQuiz');</script>";
+      $enp_quiz_next = processNextQuestion($curr_quiz_id, $next_quiz_id, $guid, $wpdb);
+      echo "<script>console.log('noNewQuiz');</script>";
 	header("Location: " . get_site_url() . "/view-quiz?guid=" . $guid . ($quiz_updated ? "&quiz_updated=1" : "&quiz_updated=2") );
   } else if( $_POST['quiz-new-question'] == "noNewQuestion" ) {
 	echo "<script>console.log('noNewQuiz');</script>";
@@ -111,14 +111,17 @@ function createQuiz($title, $question, $quiz_type, $user_ID, $guid, $date, $wpdb
   return $wpdb->insert_id;
 }
 
-function processNextQuestion($curr_quiz_id, $next_quiz_id, $wpdb) {  
-  $wpdb->insert( 'enp_quiz_next', 
+function processNextQuestion($curr_quiz_id, $next_quiz_id, $guid, $wpdb)
+{
+    $wpdb->insert( 'enp_quiz_next',
     array(
-        'curr_quiz_id' => $curr_quiz_id, 
-        'next_quiz_id' => $next_quiz_id ),
-    array(
-        '%d', 
-        '%d' )
+        'curr_quiz_id' => $curr_quiz_id,
+        'next_quiz_id' => $next_quiz_id,
+        'parent_quiz_id' => $guid,),
+        array(
+        '%d',
+            '%d',
+            '%s')
     );
   
   return $wpdb->insert_id;
