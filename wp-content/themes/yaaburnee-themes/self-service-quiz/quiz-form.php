@@ -1,20 +1,46 @@
-<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
+<?php if (have_posts()) while (have_posts()) : the_post(); ?>
     <article class="entry post clearfix">
         <h1 class="main_title"><?php the_title(); ?></h1>
 
         <div class="post-content clearfix">
-            <?
-            $add_question = false; // ||KVB
-            $new_quiz = true; // ||KVB
+            <?php
+            if ($_GET["add_question"] != 1 && $_GET["edit_guid"]) {
+                $add_question = false;
+                $new_quiz = false;
+                $first_question = false;
+            } elseif ($_GET["add_question"] == 1 && $_GET["edit_guid"]) {
+                $add_question = true;
+                $new_quiz = true;
+                $first_question = false;
+            } elseif ($_GET["add_question"] == 1 && !$_GET["edit_guid"]) {
+                $add_question = true;
+                $new_quiz = true;
+                $first_question = false;
+            } elseif (!$_GET["edit_guid"]) {
+                $add_question = true;
+                $new_quiz = true;
+                $first_question = true;
+            } else {
+//                $add_question = false;
+//                $new_quiz = true;
+            }
             if ($_GET["edit_guid"]) {
                 $quiz = $wpdb->get_row("SELECT * FROM enp_quiz WHERE guid = '" . $_GET["edit_guid"] . "'");
-                $new_quiz = false;
+//                $first_question = false;
+            } elseif ($_GET["parent_guid"]) {
+                $parent_quiz = $wpdb->get_row("SELECT * FROM enp_quiz WHERE guid = '" . $_GET["parent_guid"] . "'");
+//                $first_question = true;
+//                $new_quiz = true;
             }
             if ($_GET["curr_quiz_id"]) {
-                $add_question = true;
                 $curr_quiz_id = $_GET["curr_quiz_id"];
                 $parent_guid = $_GET["parent_guid"];
-            } // ||KVB
+                $parent_title = $parent_quiz->title;
+            } else {
+                $curr_quiz_id = $quiz->ID;
+                $parent_guid = $quiz->guid;
+                $parent_title = '';
+            }
             if ($quiz) {
                 $question_text = esc_attr($quiz->question);
             } else {
@@ -57,9 +83,10 @@
                         </div>
                         <div class="form-group">
                             <div class="col-sm-12">
-                                <input type="hidden" name="quiz-new-question" id="quiz-new-question" value="noValue"><!--||KVB-->
-                                <input type="hidden" name="curr-quiz-id" id="curr-quiz-id" value="noValue"><!--||KVB-->
-                                <input type="hidden" name="parent-guid" id="parent-guid" value="noValue"><!--||KVB-->
+                                <input type="hidden" name="quiz-new-question" id="quiz-new-question" value=""><!--||KVB-->
+                                <input type="hidden" name="curr-quiz-id" id="curr-quiz-id" value=""><!--||KVB-->
+                                <input type="hidden" name="parent-guid" id="parent-guid" value=""><!--||KVB-->
+                                <input type="hidden" name="parent-title" id="parent-title" value=""><!--||KVB-->
                                 <?php if ($new_quiz) {
                                     echo "<button id=\"addQuestionSubmit\" class=\"btn btn-primary\">Add Another Question to Quiz</button>"; // ||KVB
                                 } ?>
@@ -70,11 +97,16 @@
                                         $('#addQuestionSubmit').click(function (e) {
                                             e.preventDefault();
                                             <?php if ( $add_question == true ) {
-        //							    		echo "$('#quiz-new-question').val('newQuestionAddQuestion');";
                                                 echo "$('#quiz-new-question').val('updateQuizAddQuestion');";
                                                 echo "$('#curr-quiz-id').val('".$curr_quiz_id."');";
-                                                echo "$('#parent_guid').val('".$parent_guid."');";
-                                            } ?>
+                                                echo "$('#parent-guid').val('".$parent_guid."');";
+                                                echo "$('#parent-title').val('".$parent_title."');";
+                                            } else {
+                                                echo "$('#quiz-new-question').val('newQuizAddQuestion_shouldNotHappen');";
+                                                echo "$('#curr-quiz-id').val('".$curr_quiz_id."');";
+                                                echo "$('#parent-guid').val('".$parent_guid."');";
+                                                echo "$('#parent-title').val('".$parent_title."');";
+                                            }?>
                                             console.log($('#quiz-new-question').val()); // remove console.log ||KVB
                                             $('#quiz-form').submit();
                                             return false;
@@ -82,18 +114,21 @@
                                         $('#questionSubmit').click(function (e) {
                                             e.preventDefault();
                                             <?php if ( $add_question == true ) {
-        //							    		echo "$('#quiz-new-question').val('noNewQuestionAddQuestion');";
-                                                echo "$('#quiz-new-question').val('finishQuizAddQuestion');";
-        //								    	echo "$('#curr-quiz-id').val('".$add_question_id."');";
-                                                echo "$('#curr-quiz-id').val('".$curr_quiz_id."');";
-                                                echo "$('#parent_guid').val('".$parent_guid."');";
+        							    	    echo "$('#quiz-new-question').val('finishQuiz');";
+        								    	echo "$('#curr-quiz-id').val('".$curr_quiz_id."');";
+                                                echo "$('#parent-guid').val('".$parent_guid."');";
+                                                echo "$('#parent-title').val('".$parent_title."');";
                                             } else {
-        //							    		echo "$('#quiz-new-question').val('noNewQuestion');";
                                                 echo "$('#quiz-new-question').val('finishQuiz');";
-        //								    	echo "$('#curr-quiz-id').val('".$quiz->ID."');";
+        								    	echo "$('#curr-quiz-id').val('".$curr_quiz_id."');";
+                                                echo "$('#parent-guid').val('".$parent_guid."');";
+                                                echo "$('#parent-title').val('".$parent_title."');";
                                             } ?>
                                             //$('#curr-quiz-id').val('');
-                                            console.log($('#quiz-new-question').val()); // remove console.log ||KVB
+                                            console.log('quiz-new-question = ' + $('#quiz-new-question').val()); // remove console.log ||KVB
+                                            console.log('curr-quiz-id = ' + $('#curr-quiz-id').val()); // remove console.log ||KVB
+                                            console.log('parent-guid = ' + $('#parent-guid').val()); // remove console.log ||KVB
+                                            console.log('parent-title = ' + $('#parent-title').val()); // remove console.log ||KVB
                                             $('#quiz-form').submit();
                                             return false;
                                         });
