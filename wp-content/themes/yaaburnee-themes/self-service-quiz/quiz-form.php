@@ -74,7 +74,11 @@
                                 <?php include(locate_template('self-service-quiz/quiz-form-slider-options.php')); ?>
                             </div>
                         </div>
-                        <?php include(locate_template('self-service-quiz/quiz-form-styling-options.php')); ?>
+                        <?php // include(locate_template('self-service-quiz/quiz-form-styling-options.php'));
+                        if ($first_question == true) {
+                            include(locate_template('self-service-quiz/quiz-form-styling-options.php'));
+                        }
+                        ?>
                         <div class="panel panel-info aanswer-settings">
                             <div class="panel-heading">Advanced Answer Settings - Optional</div>
                             <div class="panel-body" id="quiz-answers">
